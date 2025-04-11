@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.singleWindowApplication
+import kotlinx.coroutines.delay
 import motorbuscaminas.EstadoJuego
 
 @Composable
@@ -40,12 +41,19 @@ fun BoardGrid(board: List<StringBuilder>, onCellClick: (row: Int, col: Int) -> U
 
 fun main() = singleWindowApplication {
     val estadoJuego = remember { EstadoJuego() }
-    // State flag for choosing custom mode.
     val customModeSelected = remember { mutableStateOf(false) }
-    // States for custom game parameters.
     val customRows = remember { mutableStateOf("10") }
     val customCols = remember { mutableStateOf("10") }
     val customMines = remember { mutableStateOf("10") }
+    val elapsedTime = remember { mutableStateOf(0) }
+
+    // Timer coroutine: increments elapsedTime every second while game is active.
+    LaunchedEffect(key1 = estadoJuego.gameStarted.value) {
+        while (estadoJuego.gameStarted.value && !estadoJuego.gameLost.value && !estadoJuego.gameWon.value) {
+            delay(1000)
+            elapsedTime.value++
+        }
+    }
 
     Column(modifier = Modifier.padding(16.dp)) {
         if (!estadoJuego.gameStarted.value) {
@@ -98,6 +106,8 @@ fun main() = singleWindowApplication {
         }
 
         if (estadoJuego.gameStarted.value) {
+            // Timer display.
+            Text("Time: ${elapsedTime.value} seconds", style = MaterialTheme.typography.h6)
             when {
                 estadoJuego.gameLost.value -> {
                     Text("Has perdido", style = MaterialTheme.typography.h4, color = Color.Red)
