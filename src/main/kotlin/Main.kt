@@ -44,27 +44,30 @@ fun main() = singleWindowApplication {
     var refresh by remember { mutableStateOf(0) }
 
     Column(modifier = Modifier.padding(16.dp)) {
-        Text("Seleccione un modo de juego:")
-        Row(modifier = Modifier.padding(vertical = 8.dp)) {
-            Button(onClick = {
-                buscaminas.crearTablero(8, 8, 9)
-                gameStarted = true
-            }) { Text("Classic") }
-            Spacer(modifier = Modifier.width(8.dp))
-            Button(onClick = {
-                buscaminas.crearTablero(9, 9, 10)
-                gameStarted = true
-            }) { Text("Easy") }
-            Spacer(modifier = Modifier.width(8.dp))
-            Button(onClick = {
-                buscaminas.crearTablero(16, 16, 40)
-                gameStarted = true
-            }) { Text("Medium") }
-            Spacer(modifier = Modifier.width(8.dp))
-            Button(onClick = {
-                buscaminas.crearTablero(16, 30, 99)
-                gameStarted = true
-            }) { Text("Expert") }
+        if (!gameStarted) {
+            // Board selection UI is visible only if game is not started.
+            Text("Seleccione un modo de juego:")
+            Row(modifier = Modifier.padding(vertical = 8.dp)) {
+                Button(onClick = {
+                    buscaminas.crearTablero(8, 8, 9)
+                    gameStarted = true
+                }) { Text("Classic") }
+                Spacer(modifier = Modifier.width(8.dp))
+                Button(onClick = {
+                    buscaminas.crearTablero(9, 9, 10)
+                    gameStarted = true
+                }) { Text("Easy") }
+                Spacer(modifier = Modifier.width(8.dp))
+                Button(onClick = {
+                    buscaminas.crearTablero(16, 16, 40)
+                    gameStarted = true
+                }) { Text("Medium") }
+                Spacer(modifier = Modifier.width(8.dp))
+                Button(onClick = {
+                    buscaminas.crearTablero(16, 30, 99)
+                    gameStarted = true
+                }) { Text("Expert") }
+            }
         }
 
         if (gameStarted) {
