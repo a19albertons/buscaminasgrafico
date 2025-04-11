@@ -1,74 +1,73 @@
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.singleWindowApplication
+import motorbuscaminas.Buscaminas
 
-// ...existing code (clases y funciones auxiliares como Buscaminas, accionRealizar, etc.)...
+// New composable to display the board as a grid with better aesthetics.
+@Composable
+fun BoardGrid(board: List<StringBuilder>) {
+    Column {
+        board.forEach { row ->
+            Row {
+                row.toString().forEach { cell ->
+                    Box(
+                        modifier = Modifier
+                            .border(1.dp, MaterialTheme.colors.primary)
+                            .size(32.dp)
+                            .padding(4.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = cell.toString(),
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.body1
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
 
 fun main() = singleWindowApplication {
     var gameStarted by remember { mutableStateOf(false) }
     val buscaminas = remember { Buscaminas() }
 
-    Column {
+    Column(modifier = Modifier.padding(16.dp)) {
         Text("Seleccione un modo de juego:")
-        Row {
+        Row(modifier = Modifier.padding(vertical = 8.dp)) {
             Button(onClick = {
                 buscaminas.crearTablero(8, 8, 9)
                 gameStarted = true
             }) { Text("Classic") }
+            Spacer(modifier = Modifier.width(8.dp))
             Button(onClick = {
                 buscaminas.crearTablero(9, 9, 10)
                 gameStarted = true
             }) { Text("Easy") }
+            Spacer(modifier = Modifier.width(8.dp))
             Button(onClick = {
                 buscaminas.crearTablero(16, 16, 40)
                 gameStarted = true
             }) { Text("Medium") }
+            Spacer(modifier = Modifier.width(8.dp))
             Button(onClick = {
                 buscaminas.crearTablero(16, 30, 99)
                 gameStarted = true
             }) { Text("Expert") }
-            // Se puede implementar el modo Custom con inputs adicionales
         }
-        
-        if (gameStarted) {
-            Text("Tablero:")
-            // Mostrar tablero
-            for (fila in buscaminas.tableroFinal) {
-                Text(fila.toString())
-            }
-            // Inputs para coordenadas y acción
-            var xInput by remember { mutableStateOf("") }
-            var yInput by remember { mutableStateOf("") }
-            var accion by remember { mutableStateOf("") }
-            
-            TextField(value = xInput, onValueChange = { xInput = it }, label = { Text("Fila") })
-            TextField(value = yInput, onValueChange = { yInput = it }, label = { Text("Columna") })
-            TextField(value = accion, onValueChange = { accion = it }, label = { Text("Acción (D, M, espacio)") })
-            
-            Button(onClick = {
-                val x = xInput.toIntOrNull() ?: 0
-                val y = yInput.toIntOrNull() ?: 0
-                val act = if (accion.isNotEmpty()) accion.uppercase().first() else ' '
-                accionRealizar(x, y, act, buscaminas)
-            }) {
-                Text("Ejecutar acción")
-            }
-        }
-    }
-}
-fun accionRealizar(x: Int, y: Int, accion: Char,buscaminas: Buscaminas){
-    when (accion) {
-        'D' -> {
-            buscaminas.indicarDescubrimiento(x, y)
-        }
-        'M' -> {
-            buscaminas.marcar(x,y)
-        }
-        ' ' -> {
-            buscaminas.desmarcar(x,y)
-        }
-    }
-}
 
+        if (gameStarted) {
+            Text("Tablero:", modifier = Modifier.padding(top = 16.dp))
+            BoardGrid(buscaminas.tableroFinal)
+
+            // Additional UI elements such as inputs for coordinates and actions go here.
+        }
+    }
+}

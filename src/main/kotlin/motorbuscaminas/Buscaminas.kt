@@ -1,3 +1,5 @@
+package motorbuscaminas
+
 import kotlin.random.Random
 
 class Buscaminas {
