@@ -40,18 +40,60 @@ fun BoardGrid(board: List<StringBuilder>, onCellClick: (row: Int, col: Int) -> U
 
 fun main() = singleWindowApplication {
     val estadoJuego = remember { EstadoJuego() }
+    // State flag for choosing custom mode.
+    val customModeSelected = remember { mutableStateOf(false) }
+    // States for custom game parameters.
+    val customRows = remember { mutableStateOf("10") }
+    val customCols = remember { mutableStateOf("10") }
+    val customMines = remember { mutableStateOf("10") }
 
     Column(modifier = Modifier.padding(16.dp)) {
         if (!estadoJuego.gameStarted.value) {
-            Text("Seleccione un modo de juego:")
-            Row(modifier = Modifier.padding(vertical = 8.dp)) {
-                Button(onClick = { estadoJuego.iniciarJuego("Classic") }) { Text("Classic") }
-                Spacer(modifier = Modifier.width(8.dp))
-                Button(onClick = { estadoJuego.iniciarJuego("Easy") }) { Text("Easy") }
-                Spacer(modifier = Modifier.width(8.dp))
-                Button(onClick = { estadoJuego.iniciarJuego("Medium") }) { Text("Medium") }
-                Spacer(modifier = Modifier.width(8.dp))
-                Button(onClick = { estadoJuego.iniciarJuego("Expert") }) { Text("Expert") }
+            if (!customModeSelected.value) {
+                Text("Seleccione un modo de juego:")
+                Row(modifier = Modifier.padding(vertical = 8.dp)) {
+                    Button(onClick = { estadoJuego.iniciarJuego("Classic") }) { Text("Classic") }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(onClick = { estadoJuego.iniciarJuego("Easy") }) { Text("Easy") }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(onClick = { estadoJuego.iniciarJuego("Medium") }) { Text("Medium") }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(onClick = { estadoJuego.iniciarJuego("Expert") }) { Text("Expert") }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(onClick = { customModeSelected.value = true }) { Text("Custom") }
+                }
+            } else {
+                Text("Custom Game Mode:")
+                OutlinedTextField(
+                    value = customRows.value,
+                    onValueChange = { customRows.value = it },
+                    label = { Text("Rows") },
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                )
+                OutlinedTextField(
+                    value = customCols.value,
+                    onValueChange = { customCols.value = it },
+                    label = { Text("Columns") },
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                )
+                OutlinedTextField(
+                    value = customMines.value,
+                    onValueChange = { customMines.value = it },
+                    label = { Text("Mines") },
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(
+                    onClick = {
+                        val rows = customRows.value.toIntOrNull() ?: 10
+                        val cols = customCols.value.toIntOrNull() ?: 10
+                        val mines = customMines.value.toIntOrNull() ?: 10
+                        estadoJuego.buscaminas.crearTablero(rows, cols, mines)
+                        estadoJuego.gameStarted.value = true
+                    }
+                ) {
+                    Text("Start Custom Game")
+                }
             }
         }
 
