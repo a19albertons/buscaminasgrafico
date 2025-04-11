@@ -8,7 +8,7 @@ import androidx.compose.ui.window.singleWindowApplication
 
 fun main() = singleWindowApplication {
     var gameStarted by remember { mutableStateOf(false) }
-    val buscaminas = Buscaminas()
+    val buscaminas = remember { Buscaminas() }
 
     Column {
         Text("Seleccione un modo de juego:")
