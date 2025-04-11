@@ -1,3 +1,4 @@
+// File: src/main/kotlin/Main.kt
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -40,6 +41,7 @@ fun BoardGrid(board: List<StringBuilder>, onCellClick: (row: Int, col: Int) -> U
 fun main() = singleWindowApplication {
     var gameStarted by remember { mutableStateOf(false) }
     var gameLost by remember { mutableStateOf(false) }
+    var gameWon by remember { mutableStateOf(false) }
     val buscaminas = remember { Buscaminas() }
     var actionMode by remember { mutableStateOf(ActionMode.DISCOVER) }
     var refresh by remember { mutableStateOf(0) }
@@ -76,6 +78,11 @@ fun main() = singleWindowApplication {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text("Tablero de minas:")
                 BoardGrid(buscaminas.tableroMinas) { _, _ -> }
+            } else if (gameWon) {
+                Text("Has ganado", style = MaterialTheme.typography.h4, color = Color.Green)
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Tablero final:")
+                BoardGrid(buscaminas.tableroFinal) { _, _ -> }
             } else {
                 Text(text = refresh.toString(), color = MaterialTheme.colors.background)
                 Button(onClick = {
@@ -100,6 +107,9 @@ fun main() = singleWindowApplication {
                         ActionMode.UNMARK -> buscaminas.desmarcar(row + 1, col + 1)
                     }
                     refresh++ // Trigger recomposition.
+                    if (buscaminas.ganar()) {
+                        gameWon = true
+                    }
                 }
             }
         }
