@@ -39,13 +39,13 @@ fun BoardGrid(board: List<StringBuilder>, onCellClick: (row: Int, col: Int) -> U
 
 fun main() = singleWindowApplication {
     var gameStarted by remember { mutableStateOf(false) }
+    var gameLost by remember { mutableStateOf(false) }
     val buscaminas = remember { Buscaminas() }
     var actionMode by remember { mutableStateOf(ActionMode.DISCOVER) }
     var refresh by remember { mutableStateOf(0) }
 
     Column(modifier = Modifier.padding(16.dp)) {
         if (!gameStarted) {
-            // Board selection UI is visible only if game is not started.
             Text("Seleccione un modo de juego:")
             Row(modifier = Modifier.padding(vertical = 8.dp)) {
                 Button(onClick = {
@@ -71,25 +71,36 @@ fun main() = singleWindowApplication {
         }
 
         if (gameStarted) {
-            // Dummy Text to ensure refresh is read and triggers recomposition.
-            Text(text = refresh.toString(), color = MaterialTheme.colors.background)
-            Button(onClick = {
-                actionMode = when (actionMode) {
-                    ActionMode.DISCOVER -> ActionMode.MARK
-                    ActionMode.MARK -> ActionMode.UNMARK
-                    ActionMode.UNMARK -> ActionMode.DISCOVER
+            if (gameLost) {
+                Text("Has perdido", style = MaterialTheme.typography.h4, color = Color.Red)
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Tablero de minas:")
+                BoardGrid(buscaminas.tableroMinas) { _, _ -> }
+            } else {
+                Text(text = refresh.toString(), color = MaterialTheme.colors.background)
+                Button(onClick = {
+                    actionMode = when (actionMode) {
+                        ActionMode.DISCOVER -> ActionMode.MARK
+                        ActionMode.MARK -> ActionMode.UNMARK
+                        ActionMode.UNMARK -> ActionMode.DISCOVER
+                    }
+                }, modifier = Modifier.padding(vertical = 8.dp)) {
+                    Text("Mode: $actionMode")
                 }
-            }, modifier = Modifier.padding(vertical = 8.dp)) {
-                Text("Mode: $actionMode")
-            }
-            Text("Tablero:", modifier = Modifier.padding(top = 16.dp))
-            BoardGrid(buscaminas.tableroFinal) { row, col ->
-                when (actionMode) {
-                    ActionMode.DISCOVER -> buscaminas.indicarDescubrimiento(row + 1, col + 1)
-                    ActionMode.MARK -> buscaminas.marcar(row + 1, col + 1)
-                    ActionMode.UNMARK -> buscaminas.desmarcar(row + 1, col + 1)
+                Text("Tablero:", modifier = Modifier.padding(top = 16.dp))
+                BoardGrid(buscaminas.tableroFinal) { row, col ->
+                    when (actionMode) {
+                        ActionMode.DISCOVER -> {
+                            buscaminas.indicarDescubrimiento(row + 1, col + 1)
+                            if (buscaminas.esMina(row + 1, col + 1, 'D')) {
+                                gameLost = true
+                            }
+                        }
+                        ActionMode.MARK -> buscaminas.marcar(row + 1, col + 1)
+                        ActionMode.UNMARK -> buscaminas.desmarcar(row + 1, col + 1)
+                    }
+                    refresh++ // Trigger recomposition.
                 }
-                refresh++ // Trigger recomposition.
             }
         }
     }
