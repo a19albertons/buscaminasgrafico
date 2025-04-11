@@ -7,10 +7,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.singleWindowApplication
-import motorbuscaminas.Buscaminas
+import motorbuscaminas.EstadoJuego
 
 @Composable
 fun BoardGrid(board: List<StringBuilder>, onCellClick: (row: Int, col: Int) -> Unit) {
@@ -39,76 +39,47 @@ fun BoardGrid(board: List<StringBuilder>, onCellClick: (row: Int, col: Int) -> U
 }
 
 fun main() = singleWindowApplication {
-    var gameStarted by remember { mutableStateOf(false) }
-    var gameLost by remember { mutableStateOf(false) }
-    var gameWon by remember { mutableStateOf(false) }
-    val buscaminas = remember { Buscaminas() }
-    var actionMode by remember { mutableStateOf(ActionMode.DISCOVER) }
-    var refresh by remember { mutableStateOf(0) }
+    val estadoJuego = remember { EstadoJuego() }
 
     Column(modifier = Modifier.padding(16.dp)) {
-        if (!gameStarted) {
+        if (!estadoJuego.gameStarted.value) {
             Text("Seleccione un modo de juego:")
             Row(modifier = Modifier.padding(vertical = 8.dp)) {
-                Button(onClick = {
-                    buscaminas.crearTablero(8, 8, 9)
-                    gameStarted = true
-                }) { Text("Classic") }
+                Button(onClick = { estadoJuego.iniciarJuego("Classic") }) { Text("Classic") }
                 Spacer(modifier = Modifier.width(8.dp))
-                Button(onClick = {
-                    buscaminas.crearTablero(9, 9, 10)
-                    gameStarted = true
-                }) { Text("Easy") }
+                Button(onClick = { estadoJuego.iniciarJuego("Easy") }) { Text("Easy") }
                 Spacer(modifier = Modifier.width(8.dp))
-                Button(onClick = {
-                    buscaminas.crearTablero(16, 16, 40)
-                    gameStarted = true
-                }) { Text("Medium") }
+                Button(onClick = { estadoJuego.iniciarJuego("Medium") }) { Text("Medium") }
                 Spacer(modifier = Modifier.width(8.dp))
-                Button(onClick = {
-                    buscaminas.crearTablero(16, 30, 99)
-                    gameStarted = true
-                }) { Text("Expert") }
+                Button(onClick = { estadoJuego.iniciarJuego("Expert") }) { Text("Expert") }
             }
         }
 
-        if (gameStarted) {
-            if (gameLost) {
-                Text("Has perdido", style = MaterialTheme.typography.h4, color = Color.Red)
-                Spacer(modifier = Modifier.height(16.dp))
-                Text("Tablero de minas:")
-                BoardGrid(buscaminas.tableroMinas) { _, _ -> }
-            } else if (gameWon) {
-                Text("Has ganado", style = MaterialTheme.typography.h4, color = Color.Green)
-                Spacer(modifier = Modifier.height(16.dp))
-                Text("Tablero final:")
-                BoardGrid(buscaminas.tableroFinal) { _, _ -> }
-            } else {
-                Text(text = refresh.toString(), color = MaterialTheme.colors.background)
-                Button(onClick = {
-                    actionMode = when (actionMode) {
-                        ActionMode.DISCOVER -> ActionMode.MARK
-                        ActionMode.MARK -> ActionMode.UNMARK
-                        ActionMode.UNMARK -> ActionMode.DISCOVER
-                    }
-                }, modifier = Modifier.padding(vertical = 8.dp)) {
-                    Text("Mode: $actionMode")
+        if (estadoJuego.gameStarted.value) {
+            when {
+                estadoJuego.gameLost.value -> {
+                    Text("Has perdido", style = MaterialTheme.typography.h4, color = Color.Red)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Tablero de minas:")
+                    BoardGrid(estadoJuego.buscaminas.tableroMinas) { _, _ -> }
                 }
-                Text("Tablero:", modifier = Modifier.padding(top = 16.dp))
-                BoardGrid(buscaminas.tableroFinal) { row, col ->
-                    when (actionMode) {
-                        ActionMode.DISCOVER -> {
-                            buscaminas.indicarDescubrimiento(row + 1, col + 1)
-                            if (buscaminas.esMina(row + 1, col + 1, 'D')) {
-                                gameLost = true
-                            }
-                        }
-                        ActionMode.MARK -> buscaminas.marcar(row + 1, col + 1)
-                        ActionMode.UNMARK -> buscaminas.desmarcar(row + 1, col + 1)
+                estadoJuego.gameWon.value -> {
+                    Text("Has ganado", style = MaterialTheme.typography.h4, color = Color.Green)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Tablero final:")
+                    BoardGrid(estadoJuego.buscaminas.tableroFinal) { _, _ -> }
+                }
+                else -> {
+                    Text(text = estadoJuego.refresh.value.toString(), color = MaterialTheme.colors.background)
+                    Button(
+                        onClick = { estadoJuego.changeActionMode() },
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    ) {
+                        Text("Mode: ${estadoJuego.actionMode.value}")
                     }
-                    refresh++ // Trigger recomposition.
-                    if (buscaminas.ganar()) {
-                        gameWon = true
+                    Text("Tablero:", modifier = Modifier.padding(top = 16.dp))
+                    BoardGrid(estadoJuego.buscaminas.tableroFinal) { row, col ->
+                        estadoJuego.onCellClick(row, col)
                     }
                 }
             }
