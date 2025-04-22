@@ -51,25 +51,23 @@ fun BoardGrid(board: List<StringBuilder>, onCellClick: (row: Int, col: Int) -> U
 @Composable
 fun LoseBoardGrid(board: List<StringBuilder>) {
     Column {
-        board.forEachIndexed { rowIndex, row ->
+        board.forEach { row ->
             Row {
-                row.forEachIndexed { colIndex, cell ->
-                    // If cell is bomb (we assume it is indicated by 'B'), we show bomb emoticon and grey background,
-                    // otherwise empty field gets a white background.
-                    val cellText = if (cell == '*') "💣" else cell.toString()
-                    val backgroundColor = if (cell == '*') Color.LightGray else Color.White
+                row.forEach { cell ->
+                    val cellText = when {
+                        cell == '*' -> "💣"
+                        cell == '-' -> " "
+                        else -> cell.toString()
+                    }
                     Box(
                         modifier = Modifier
                             .border(1.dp, MaterialTheme.colors.primary)
-                            .background(backgroundColor)
+                            .background(if (cell == '*') Color.LightGray else Color.White)
                             .size(32.dp)
                             .padding(4.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = cellText,
-                            style = MaterialTheme.typography.body1
-                        )
+                        Text(text = cellText, style = MaterialTheme.typography.body1)
                     }
                 }
             }
