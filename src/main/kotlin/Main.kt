@@ -12,7 +12,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.singleWindowApplication
 import kotlinx.coroutines.delay
-import motorbuscaminas.EstadoJuego
 
 @Composable
 fun BoardGrid(board: List<StringBuilder>, onCellClick: (row: Int, col: Int) -> Unit) {

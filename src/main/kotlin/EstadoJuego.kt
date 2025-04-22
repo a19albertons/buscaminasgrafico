@@ -1,7 +1,7 @@
 // File: src/main/kotlin/EstadoJuego.kt
-package motorbuscaminas
 
 import androidx.compose.runtime.mutableStateOf
+import motorbuscaminas.Buscaminas
 
 class EstadoJuego {
     val gameStarted = mutableStateOf(false)
