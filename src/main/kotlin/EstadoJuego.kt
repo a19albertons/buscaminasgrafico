@@ -2,7 +2,6 @@
 package motorbuscaminas
 
 import androidx.compose.runtime.mutableStateOf
-import kotlin.random.Random
 
 class EstadoJuego {
     val gameStarted = mutableStateOf(false)
