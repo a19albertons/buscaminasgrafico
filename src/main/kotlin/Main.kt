@@ -1,4 +1,5 @@
 // File: src/main/kotlin/Main.kt
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -19,16 +20,25 @@ fun BoardGrid(board: List<StringBuilder>, onCellClick: (row: Int, col: Int) -> U
         board.forEachIndexed { rowIndex, row ->
             Row {
                 row.toString().forEachIndexed { colIndex, cell ->
+                    val cellText = if (cell == 'B') "🚩" else cell.toString()
+                    // When the cell has been discovered (contains a digit, a bomb indicator “B”, or a space) it gets a white background.
+                    // Unclicked cells have a grey background.
+                    val backgroundColor = when {
+                        cell == 'F' -> Color.LightGray
+                        cell.isDigit() || cell == 'B' || cell == ' ' -> Color.White
+                        else -> Color.LightGray
+                    }
                     Box(
                         modifier = Modifier
                             .border(1.dp, MaterialTheme.colors.primary)
+                            .background(backgroundColor)
                             .size(32.dp)
                             .padding(4.dp)
                             .clickable { onCellClick(rowIndex, colIndex) },
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = cell.toString(),
+                            text = cellText,
                             textAlign = TextAlign.Center,
                             style = MaterialTheme.typography.body1
                         )
