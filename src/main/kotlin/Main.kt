@@ -48,6 +48,34 @@ fun BoardGrid(board: List<StringBuilder>, onCellClick: (row: Int, col: Int) -> U
         }
     }
 }
+@Composable
+fun LoseBoardGrid(board: List<StringBuilder>) {
+    Column {
+        board.forEachIndexed { rowIndex, row ->
+            Row {
+                row.forEachIndexed { colIndex, cell ->
+                    // If cell is bomb (we assume it is indicated by 'B'), we show bomb emoticon and grey background,
+                    // otherwise empty field gets a white background.
+                    val cellText = if (cell == '*') "💣" else cell.toString()
+                    val backgroundColor = if (cell == '*') Color.LightGray else Color.White
+                    Box(
+                        modifier = Modifier
+                            .border(1.dp, MaterialTheme.colors.primary)
+                            .background(backgroundColor)
+                            .size(32.dp)
+                            .padding(4.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = cellText,
+                            style = MaterialTheme.typography.body1
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
 
 fun main() = singleWindowApplication {
     val estadoJuego = remember { EstadoJuego() }
@@ -123,7 +151,7 @@ fun main() = singleWindowApplication {
                     Text("Has perdido", style = MaterialTheme.typography.h4, color = Color.Red)
                     Spacer(modifier = Modifier.height(16.dp))
                     Text("Tablero de minas:")
-                    BoardGrid(estadoJuego.buscaminas.tableroMinas) { _, _ -> }
+                    LoseBoardGrid(estadoJuego.buscaminas.tableroMinas)
                 }
                 estadoJuego.gameWon.value -> {
                     Text("Has ganado", style = MaterialTheme.typography.h4, color = Color.Green)
