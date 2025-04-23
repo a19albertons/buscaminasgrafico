@@ -148,13 +148,13 @@ fun main() = singleWindowApplication {
                     Text("Has perdido", style = MaterialTheme.typography.h4, color = Color.Red)
                     Spacer(modifier = Modifier.height(16.dp))
                     Text("Tablero de minas:")
-                    LoseBoardGrid(estadoJuego.buscaminas.tableroMinas)
+                    LoseBoardGrid(estadoJuego.buscaminas.tableroDeMinas())
                 }
                 estadoJuego.gameWon.value -> {
                     Text("Has ganado", style = MaterialTheme.typography.h4, color = Color.Green)
                     Spacer(modifier = Modifier.height(16.dp))
                     Text("Tablero final:")
-                    BoardGrid(estadoJuego.buscaminas.tableroFinal) { _, _ -> }
+                    BoardGrid(estadoJuego.buscaminas.tableroDeFinal()) { _, _ -> }
                 }
                 else -> {
                     Text(text = estadoJuego.refresh.value.toString(), color = MaterialTheme.colors.background)
@@ -165,7 +165,7 @@ fun main() = singleWindowApplication {
                         Text("Mode: ${estadoJuego.actionMode.value}")
                     }
                     Text("Tablero:", modifier = Modifier.padding(top = 16.dp))
-                    BoardGrid(estadoJuego.buscaminas.tableroFinal) { row, col ->
+                    BoardGrid(estadoJuego.buscaminas.tableroDeFinal()) { row, col ->
                         estadoJuego.onCellClick(row, col)
                     }
                 }
