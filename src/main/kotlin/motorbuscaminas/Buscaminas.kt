@@ -191,6 +191,15 @@ class Buscaminas {
     fun esMina(x:Int, y:Int, tipo:Char):Boolean{
         return tableroMinas[x-1][y-1] == '*' && tableroBanderas[x-1][y-1] == '-' && tipo == 'D'
     }
+
+    fun estaMarcada(row: Int, col: Int): Boolean {
+        // Assuming row and col are 1-indexed as per other functions like esMina, marcar, etc.
+        if (row - 1 in tableroBanderas.indices && col - 1 in tableroBanderas[row - 1].indices) {
+            return tableroBanderas[row - 1][col - 1] == '*'
+        }
+        return false
+    }
+
     fun ganar():Boolean{
         var numGuiones=0
         for (i in 0..<tablero.size){
@@ -203,3 +212,4 @@ class Buscaminas {
         return numGuiones==numMinas
     }
 }
+

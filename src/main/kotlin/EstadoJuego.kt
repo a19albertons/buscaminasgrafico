@@ -8,7 +8,6 @@ class EstadoJuego {
     val gameLost = mutableStateOf(false)
     val gameWon = mutableStateOf(false)
     val refresh = mutableStateOf(0)
-    val actionMode = mutableStateOf(ActionMode.DISCOVER)
     val buscaminas = Buscaminas()
 
     fun iniciarJuego(mode: String) {
@@ -21,28 +20,23 @@ class EstadoJuego {
         gameStarted.value = true
     }
 
-    fun onCellClick(row: Int, col: Int) {
-        when (actionMode.value) {
-            ActionMode.DISCOVER -> {
-                buscaminas.indicarDescubrimiento(row + 1, col + 1)
-                if (buscaminas.esMina(row + 1, col + 1, 'D')) {
-                    gameLost.value = true
-                }
+    fun onCellClick(row: Int, col: Int, isLeftClick: Boolean) {
+        if (isLeftClick) {
+            buscaminas.indicarDescubrimiento(row + 1, col + 1)
+            if (buscaminas.esMina(row + 1, col + 1, 'D')) {
+                gameLost.value = true
             }
-            ActionMode.MARK -> buscaminas.marcar(row + 1, col + 1)
-            ActionMode.UNMARK -> buscaminas.desmarcar(row + 1, col + 1)
+        } else { // Right click
+            if (buscaminas.estaMarcada(row + 1, col + 1)) {
+                buscaminas.desmarcar(row + 1, col + 1)
+            } else {
+                buscaminas.marcar(row + 1, col + 1)
+            }
         }
         refresh.value++
         if (buscaminas.ganar()) {
             gameWon.value = true
         }
     }
-
-    fun changeActionMode() {
-        actionMode.value = when (actionMode.value) {
-            ActionMode.DISCOVER -> ActionMode.MARK
-            ActionMode.MARK -> ActionMode.UNMARK
-            ActionMode.UNMARK -> ActionMode.DISCOVER
-        }
-    }
 }
+

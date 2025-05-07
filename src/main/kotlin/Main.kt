@@ -1,7 +1,6 @@
 // File: src/main/kotlin/Main.kt
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -12,16 +11,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.singleWindowApplication
 import kotlinx.coroutines.delay
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.PointerMatcher
+import androidx.compose.foundation.onClick
+import androidx.compose.ui.input.pointer.PointerButton // Added import
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun BoardGrid(board: List<StringBuilder>, onCellClick: (row: Int, col: Int) -> Unit) {
+fun BoardGrid(board: List<StringBuilder>, onCellClick: (row: Int, col: Int, isLeftClick: Boolean) -> Unit) {
     Column {
         board.forEachIndexed { rowIndex, row ->
             Row {
                 row.toString().forEachIndexed { colIndex, cell ->
                     val cellText = if (cell == 'B') "🚩" else cell.toString()
-                    // When the cell has been discovered (contains a digit, a bomb indicator “B”, or a space) it gets a white background.
-                    // Unclicked cells have a grey background.
                     val backgroundColor = when {
                         cell == 'F' -> Color.LightGray
                         cell.isDigit() || cell == 'B' || cell == ' ' -> Color.White
@@ -33,7 +35,14 @@ fun BoardGrid(board: List<StringBuilder>, onCellClick: (row: Int, col: Int) -> U
                             .background(backgroundColor)
                             .size(32.dp)
                             .padding(4.dp)
-                            .clickable { onCellClick(rowIndex, colIndex) },
+                            .onClick(
+                                matcher = PointerMatcher.Primary,
+                                onClick = { onCellClick(rowIndex, colIndex, true) }
+                            )
+                            .onClick(
+                                matcher = PointerMatcher.mouse(PointerButton.Secondary), // Changed to use PointerButton.Secondary
+                                onClick = { onCellClick(rowIndex, colIndex, false) }
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
@@ -47,6 +56,7 @@ fun BoardGrid(board: List<StringBuilder>, onCellClick: (row: Int, col: Int) -> U
         }
     }
 }
+
 @Composable
 fun LoseBoardGrid(board: List<StringBuilder>) {
     Column {
@@ -154,22 +164,17 @@ fun main() = singleWindowApplication {
                     Text("Has ganado", style = MaterialTheme.typography.h4, color = Color.Green)
                     Spacer(modifier = Modifier.height(16.dp))
                     Text("Tablero final:")
-                    BoardGrid(estadoJuego.buscaminas.tableroDeFinal()) { _, _ -> }
+                    BoardGrid(estadoJuego.buscaminas.tableroDeFinal()) { _, _, _ -> }
                 }
                 else -> {
                     Text(text = estadoJuego.refresh.value.toString(), color = MaterialTheme.colors.background)
-                    Button(
-                        onClick = { estadoJuego.changeActionMode() },
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    ) {
-                        Text("Mode: ${estadoJuego.actionMode.value}")
-                    }
                     Text("Tablero:", modifier = Modifier.padding(top = 16.dp))
-                    BoardGrid(estadoJuego.buscaminas.tableroDeFinal()) { row, col ->
-                        estadoJuego.onCellClick(row, col)
+                    BoardGrid(estadoJuego.buscaminas.tableroDeFinal()) { row, col, isLeftClick ->
+                        estadoJuego.onCellClick(row, col, isLeftClick)
                     }
                 }
             }
         }
     }
 }
+
